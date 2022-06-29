@@ -1,0 +1,5 @@
+nano/
+testbench/
+top_level/
+transcript
+vsim.wlf
