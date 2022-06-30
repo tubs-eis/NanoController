@@ -9,20 +9,15 @@
 
 #include "include/imem.hpp"
 
-int imem_ref::min(int a, int b) {
-	return (a < b) ? a : b;
-}
-
 void imem_ref::func() {
-  unsigned int tmp_addr = imem_addr.read().to_uint();
-  
-  if(tmp_addr < (sizeof(imem_image)/sizeof(imem_image[0]))) 
-    imem_out.write(imem_image[tmp_addr]);
-}
-
-void imem_ref::addrchk() {
   while(true) {
     wait();
-    unsigned int tmp_addr = imem_addr.read().to_uint();
+    if(imem_oe.read() == '1') {
+      unsigned int tmp_addr = imem_addr.read().to_uint();
+      if(tmp_addr < (sizeof(imem_image)/sizeof(imem_image[0]))) 
+        imem_out.write(imem_image[tmp_addr]);
+      else
+        SC_REPORT_FATAL("imem", "[ERROR] imem_image Address Overflow. Stopping.");
+    }
   }
 }

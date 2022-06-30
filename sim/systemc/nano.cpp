@@ -57,17 +57,17 @@ void nano_ref::func() {
   dmem_we.write(sc_logic('0'));
   dmem_in.write(accu);
   dmem_addr.write(memptr);
-  imem_oe.write(sc_logic('0'));
+  imem_oe_int.write(sc_logic('0'));
   imem_addr.write(pc);
+  concat_en_int.write(sc_logic('0'));
 
   // function
   while(true) {
 
     // Fetch IR
-    imem_oe.write(sc_logic('1'));
+    imem_oe_int.write(sc_logic('0'));
     wait();
     ir = imem_out.read();
-    imem_oe.write(sc_logic('0'));
     branch_pc(1);
     
     // Fetch MEMPTR / OP B if necessary
@@ -77,17 +77,30 @@ void nano_ref::func() {
       case OP_LIS:
       case OP_LDS:
       case OP_CST:
+      case OP_LD:
       case OP_ST:
+        imem_oe_int.write(sc_logic('1'));
+        wait();
+        branch_pc(1);
+        // !! changed for fixed concat for MEH ASIC with 7 bit datapath !!
+        //concat_en_int.write(sc_logic('1'));
+        concat_en_int.write(sc_logic('0'));
+        //imem_oe_int.write(sc_logic('1'));
+        imem_oe_int.write(sc_logic('0'));
+        // !! change end !!
         i = 0;
         do {
-          imem_oe.write(sc_logic('1'));
           wait();
-          concat = (imem_out.read().get_bit(NANO_I_W-1) == 1);
-          if(i <= (NANO_D_ADR_W-1)/(NANO_I_W-1))
-            memptr.range(min(NANO_D_ADR_W,(i+1)*(NANO_I_W-1))-1,i*(NANO_I_W-1)) = ((sc_uint<NANO_I_W>)imem_out.read()).range(min(NANO_D_ADR_W,(i+1)*(NANO_I_W-1))-i*(NANO_I_W-1)-1,0);
-          imem_oe.write(sc_logic('0'));
+          concat = (imem_oe.read() == '1');
+          // !! changed for fixed concat for MEH ASIC with 7 bit datapath !!
+          //if(i <= (NANO_D_ADR_W-1)/(NANO_I_W-1))
+          //  memptr.range(min(NANO_D_ADR_W,(i+1)*(NANO_I_W-1))-1,i*(NANO_I_W-1)) = ((sc_uint<NANO_I_W>)imem_out.read()).range(min(NANO_D_ADR_W,(i+1)*(NANO_I_W-1))-i*(NANO_I_W-1)-1,0);
+          if(i <= (NANO_D_ADR_W)/(NANO_I_W))
+            memptr.range(min(NANO_D_ADR_W,(i+1)*(NANO_I_W))-1,i*(NANO_I_W)) = ((sc_uint<NANO_I_W>)imem_out.read()).range(min(NANO_D_ADR_W,(i+1)*(NANO_I_W))-i*(NANO_I_W)-1,0);
+          if(concat)
+            branch_pc(1);
+          // !! change end !!
           dmem_addr.write(memptr);
-          branch_pc(1);
           i++;
         } while(concat);
         break;
@@ -95,17 +108,31 @@ void nano_ref::func() {
       // OP B
       case OP_LDI:
       case OP_CMPI:
+      case OP_ADDI:
+      case OP_SUBI:
       case OP_DBNE:
       case OP_BNE:
+        imem_oe_int.write(sc_logic('1'));
+        wait();
+        branch_pc(1);
+        concat_en_int.write(sc_logic('1'));
+        imem_oe_int.write(sc_logic('1'));
         i = 0;
         do {
-          imem_oe.write(sc_logic('1'));
           wait();
-          concat = (imem_out.read().get_bit(NANO_I_W-1) == 1);
+          concat = (imem_oe.read() == '1');
+          // !! changed for fixed concat for MEH ASIC with 7 bit datapath !!
+          if(i)
+            concat = false;
+          // !! change end !!
           if(i <= (NANO_D_W-1)/(NANO_I_W-1))
             opb.range(min(NANO_D_W,(i+1)*(NANO_I_W-1))-1,i*(NANO_I_W-1)) = ((sc_uint<NANO_I_W>)imem_out.read()).range(min(NANO_D_W,(i+1)*(NANO_I_W-1))-i*(NANO_I_W-1)-1,0);
-          imem_oe.write(sc_logic('0'));
-          branch_pc(1);
+          // !! changed for fixed concat for MEH ASIC with 7 bit datapath !!
+          if(i)
+            opb.range(min(NANO_D_W,(i+1)*(NANO_I_W-1)),i*(NANO_I_W-1)) = ((sc_uint<NANO_I_W>)imem_out.read()).range(min(NANO_D_W,(i+1)*(NANO_I_W-1))-i*(NANO_I_W-1),0);
+          if(concat)
+            branch_pc(1);
+          // !! change end !!
           i++;
         } while(concat);
         break;
@@ -114,11 +141,15 @@ void nano_ref::func() {
       default: break;
     }
     
+    concat_en_int.write(sc_logic('0'));
+    imem_oe_int.write(sc_logic('0'));
+    
     // Execute Instructions
     switch(ir.to_uint()) {
       
       // LDI: 1 Execution Cycle
       case OP_LDI:
+        imem_oe_int.write(sc_logic('1'));
         wait();
         set_accu(opb);
         break;
@@ -131,12 +162,14 @@ void nano_ref::func() {
         set_accu(0);
       case OP_ST:
         dmem_we.write(sc_logic('1'));
+        imem_oe_int.write(sc_logic('1'));
         wait();
         dmem_we.write(sc_logic('0'));
         break;
       
       // CMPI: 1 Execution Cycle
       case OP_CMPI:
+        imem_oe_int.write(sc_logic('1'));
         wait();
         zero = ((accu - opb) == 0);
         break;
@@ -153,6 +186,7 @@ void nano_ref::func() {
         wait();
         set_accu((unsigned int)accu + 1);
         dmem_we.write(sc_logic('1'));
+        imem_oe_int.write(sc_logic('1'));
         wait();
         dmem_we.write(sc_logic('0'));
         break;
@@ -169,22 +203,25 @@ void nano_ref::func() {
         wait();
         set_accu((unsigned int)accu - 1);
         dmem_we.write(sc_logic('1'));
+        imem_oe_int.write(sc_logic('1'));
         wait();
         dmem_we.write(sc_logic('0'));
         break;
       
-      // DBNE: 2 Execution Cycles
-      // BNE:  1 Execution Cycle
+      // DBNE: 3 Execution Cycles
+      // BNE:  2 Execution Cycles
       case OP_DBNE:
         wait();
         set_accu((unsigned int)accu - 1);
       case OP_BNE:  
         wait();
-        if(zero) break;
-        branch_pc(opb);
+        if(!zero)
+          branch_pc(opb);
+        imem_oe_int.write(sc_logic('1'));
+        wait();
         break;
       
-      // SLEEP: 1 Execution Cycle when Wake Signal set
+      // SLEEP: 2 Execution Cycles when Wake Signal set
       case OP_SLEEP:
         while(true) {
           if(rtc_wake || ext_wake) break;
@@ -199,15 +236,22 @@ void nano_ref::func() {
           ext_wake = false;
         }
         imem_addr.write(pc);
+        imem_oe_int.write(sc_logic('1'));
+        wait();
         break;
       
       //
       default: 
+        imem_oe_int.write(sc_logic('1'));
         wait();
         break;
     }
 
   }
+}
+
+void nano_ref::oe_concat() {
+  imem_oe.write((concat_en_int.read() == '1') ? imem_out.read()[NANO_I_W-1] : (rst_n.read() ? imem_oe_int.read() : sc_logic('1')));
 }
 
 void nano_ref::func_rtc_comb() {

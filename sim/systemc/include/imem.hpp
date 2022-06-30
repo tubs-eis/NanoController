@@ -25,14 +25,10 @@ SC_MODULE(imem_ref) {
   sc_in<sc_logic>               imem_oe;
   sc_in<sc_uint<NANO_I_ADR_W> > imem_addr;
 
-  int min(int a, int b);
   void func();
-  void addrchk();
 
   SC_CTOR(imem_ref) {
-    SC_METHOD(func);
-    sensitive << imem_addr;
-    SC_CTHREAD(addrchk, clk.pos());
+    SC_CTHREAD(func, clk.pos());
   }
 };
 

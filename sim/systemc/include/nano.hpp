@@ -25,6 +25,9 @@ SC_MODULE(nano_ref) {
   sc_out<sc_uint<NANO_D_ADR_W> >           dmem_addr;
   sc_out<sc_logic>                         imem_oe;
   sc_out<sc_uint<NANO_I_ADR_W> >           imem_addr;
+  
+  sc_signal<sc_logic> imem_oe_int;
+  sc_signal<sc_logic> concat_en_int;
 
   sc_uint<NANO_I_ADR_W> pc;
   sc_uint<NANO_D_W>     accu, opb;
@@ -43,6 +46,7 @@ SC_MODULE(nano_ref) {
   void branch_pc(int offset);
   void set_accu(unsigned int result);
   void func();
+  void oe_concat();
   void func_rtc_seq();
   void func_rtc_comb();
   void func_ext_seq();
@@ -50,6 +54,8 @@ SC_MODULE(nano_ref) {
   SC_CTOR(nano_ref) {
     SC_CTHREAD(func, clk.pos());
     async_reset_signal_is(rst_n,false);
+    SC_METHOD(oe_concat);
+    sensitive << concat_en_int << imem_out << imem_oe_int << rst_n;
     SC_METHOD(func_rtc_comb);
     sensitive << func_in;
     SC_CTHREAD(func_rtc_seq, clk.pos());
