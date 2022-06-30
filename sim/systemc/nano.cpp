@@ -155,12 +155,13 @@ void nano_ref::func() {
         break;
       
       // CST, CSTL: 2 Execution Cycles
-      // ST:        1 Execution Cycle
+      // ST, STL:   1 Execution Cycle
       case OP_CST:
       case OP_CSTL: 
         wait();
         set_accu(0);
       case OP_ST:
+      case OP_STL:
         dmem_we.write(sc_logic('1'));
         imem_oe_int.write(sc_logic('1'));
         wait();
@@ -172,6 +173,31 @@ void nano_ref::func() {
         imem_oe_int.write(sc_logic('1'));
         wait();
         zero = ((accu - opb) == 0);
+        break;
+      
+      // ADDI: 1 Execution Cycle
+      case OP_ADDI:
+        imem_oe_int.write(sc_logic('1'));
+        wait();
+        set_accu((unsigned int)accu + (unsigned int)opb);
+        break;
+      
+      // SUBI: 1 Execution Cycle
+      case OP_SUBI:
+        imem_oe_int.write(sc_logic('1'));
+        wait();
+        set_accu((unsigned int)accu - (unsigned int)opb);
+        break;
+      
+      // LD: 2 Execution Cycles
+      case OP_LD:
+        dmem_oe.write(sc_logic('1'));
+        wait();
+        opb = dmem_out.read();
+        dmem_oe.write(sc_logic('0'));
+        imem_oe_int.write(sc_logic('1'));
+        wait();
+        set_accu(opb);
         break;
       
       // LIS, LISL: 4 Execution Cycles
