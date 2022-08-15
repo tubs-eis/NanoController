@@ -9,9 +9,9 @@ NanoController is an open-source processor architecture, which is intended to be
 	The NanoController features a compact ISA, minimal silicon area and power consumption, and enables the implementation of efficient power management strategies in comparison to much simpler and constrained always-on timer circuits.
   
 The NanoController architecture is described in the following paper. If you are using NanoController, please cite it as follows:
->M. Weißbrich and G. Payá-Vayá.
->"**NanoController: A Minimal and Flexible Processor Architecture for Ultra-Low-Power Always-On System State Controllers**".
->*2022 22nd International Conference on Embedded Computer Systems: Architectures, Modeling, and Simulation (SAMOS XXII)*, 2022, accepted for publication.
+>Weißbrich, M., Payá-Vayá, G. (2022). 
+>**NanoController: A Minimal and Flexible Processor Architecture for Ultra-Low-Power Always-On System State Controllers**.
+>In: Orailoglu, A., Reichenbach, M., Jung, M. (eds) *Embedded Computer Systems: Architectures, Modeling, and Simulation. SAMOS 2022*. Lecture Notes in Computer Science, vol 13511. Springer, Cham. https://doi.org/10.1007/978-3-031-15074-6_7
 
 
 ## Table of Contents
@@ -86,6 +86,6 @@ The *axasm* universal cross assembler by Al Williams (https://github.com/wd5gnr/
 ## Citation
 
 The NanoController architecture is described in the following paper. If you are using NanoController, please cite it as follows:
->M. Weißbrich and G. Payá-Vayá.
->"**NanoController: A Minimal and Flexible Processor Architecture for Ultra-Low-Power Always-On System State Controllers**".
->*2022 22nd International Conference on Embedded Computer Systems: Architectures, Modeling, and Simulation (SAMOS XXII)*, 2022, accepted for publication.
+>Weißbrich, M., Payá-Vayá, G. (2022). 
+>**NanoController: A Minimal and Flexible Processor Architecture for Ultra-Low-Power Always-On System State Controllers**.
+>In: Orailoglu, A., Reichenbach, M., Jung, M. (eds) *Embedded Computer Systems: Architectures, Modeling, and Simulation. SAMOS 2022*. Lecture Notes in Computer Science, vol 13511. Springer, Cham. https://doi.org/10.1007/978-3-031-15074-6_7
