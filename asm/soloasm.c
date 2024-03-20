@@ -155,8 +155,12 @@ int main(int argc, char *argv[])
       break;
     case 5:
       fseek(outfile,_solo_info.begin,SEEK_SET);
-      for (int i=_solo_info.begin;i<=_solo_info.end;i++)
-	fputc(_solo_info.ary[i],outfile);
+      // !! changed for MEH ASIC flashloader with 8 bit load, load 2 4-bit instructions parallel !!
+      //for (int i=_solo_info.begin;i<=_solo_info.end;i++)
+	//fputc(_solo_info.ary[i],outfile);
+      for (int i=_solo_info.begin;i<=_solo_info.end;i+=2)
+	fputc((_solo_info.ary[i+1]&15)|((_solo_info.ary[i]&15)<<4),outfile);
+      // !! change end !!
       break;
       
     case 6: ; // VHDL init file output
