@@ -1,0 +1,7 @@
+sim/
+syn/
+*.jou
+*.log
+result.out
+result.hex
+*.tmp
