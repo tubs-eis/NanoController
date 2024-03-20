@@ -22,6 +22,7 @@ The NanoController architecture is described in the following paper. If you are 
 - [Installation](#Installation)
 - [Configuring the Environment](#Configuring-the-Environment)
 - [Verifying the Environment Configuration](#Verifying-the-Environment-Configuration)
+- [Verifying the FPGA Synthesis Configuration](#Verifying-the-FPGA-Synthesis-Configuration)
 
 [Contributors](#Contributors)
 
@@ -35,12 +36,15 @@ This repository contains the *open-source RTL implementation* of the NanoControl
 
 The simulation environment is currently using **Mentor QuestaSim** to perform the VHDL/SystemC co-simulation, which you need to provide within your infrastructure. Version 2021.3 has been tested, older or newer versions without warranty.
 
+**NEW 2024-03:** The *NanoSoftController* FPGA-optimized variant has been added to this repo, which uses distributed LUT RAM for instruction and data memory on Xilinx FPGAs. Furthermore, a reference Vivado synthesis and implementation flow with a Digilent Arty-A7 target is included. Vivado Version 2023.2 has been tested.
+
 ### Repository Structure
 
 | Directory | Description |
 |-----------|-------------|
 | `asm` | Contains the Table Assembler tool to translate NanoController assembly code to binary images. Based on the *axasm* universal cross assembler by Al Williams (https://github.com/wd5gnr/axasm). |
 | `config` | Parameter configuration header for the functional SystemC model. Should be coherent with the parameterization in the VHDL packages! |
+| `fpga_arty` | Contains the reference Vivado synthesis and implementation flow with a Digilent Arty-A7 FPGA target. Uses the *NanoSoftController* FPGA-optimized variant of the NanoController. |
 | `rtl` | Contains the VHDL source code of the open-source RTL implementation of NanoController. |
 | `sim` | VHDL/SystemC co-simulation script flow in sub-directory `scr`, and the functional SystemC model in sub-directory `systemc`. |
 | `sw` | NanoController assembly code of example programs. |
@@ -56,6 +60,7 @@ git clone https://github.com/tubs-eis/NanoController
 ### Configuring the Environment
 
 1. In `sim/init_tools`, define the necessary actions to set up your **Mentor QuestaSim** environment for VHDL/SystemC co-simulation.
+2. In `fpga_arty/init_tools`, define the necessary actions to set up your **Xilinx Vivado** environment for FPGA synthesis and implementation of the FPGA-optimized *NanoSoftController* variant. If you want to use the reference target (Artix-7 FPGA, Digilent Arty-A7 development board), make sure your Vivado installation has the Digilent board files installed (https://digilent.com/reference/programmable-logic/guides/install-board-files).
 
 ### Verifying the Environment Configuration
 
@@ -70,6 +75,22 @@ Two example programs should be simulated in sequence. The termination should occ
 
 ```
 ** Note: (vsim-6574) SystemC simulation stopped by user.
+```
+
+### Verifying the FPGA Synthesis Configuration
+
+```
+cd fpga_arty
+make all
+```
+
+This should run the Vivado synthesis and implementation flow for the *NanoSoftController* for an Artix-7 target on the Digilent Arty-A7 FPGA board. The flow should finish without any error or interruption. After completion, you can examine the created Vivado project in the GUI via `make run_gui`. In behavioral simulation, you can source the prepared simulation script in the simulator's Tcl console via `source ../run_sim_gui.tcl`. You should observe activity on the `led` outputs of the reference system top-level, and you should see an LED reaction on the `btn` input trigger.
+
+A programming target is provided in the Makefile, which, when a board is connected, should properly load the bitstream onto the FPGA device of a Digilent Arty-A7 board:
+
+```
+cd fpga_arty
+make fpga_pgm
 ```
 
 ## Contributors
