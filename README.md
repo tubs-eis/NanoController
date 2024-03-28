@@ -13,6 +13,9 @@ The NanoController architecture is described in the following paper. If you are 
 >**NanoController: A Minimal and Flexible Processor Architecture for Ultra-Low-Power Always-On System State Controllers**.
 >In: Orailoglu, A., Reichenbach, M., Jung, M. (eds) *Embedded Computer Systems: Architectures, Modeling, and Simulation. SAMOS 2022*. Lecture Notes in Computer Science, vol 13511. Springer, Cham. https://doi.org/10.1007/978-3-031-15074-6_7
 
+## NEW 2024-03: NanoSoftController (optimized for FPGA)
+
+The *NanoSoftController* FPGA-optimized variant has been added to this repo, which uses distributed LUT RAM for instruction and data memory on Xilinx FPGAs. Furthermore, a reference Vivado synthesis and implementation flow with a Digilent Arty-A7 target is included. Vivado Version 2023.2 has been tested.
 
 ## Table of Contents
 
@@ -35,8 +38,6 @@ The NanoController architecture is described in the following paper. If you are 
 This repository contains the *open-source RTL implementation* of the NanoController architecture, and a *cycle-accurate functional SystemC model* of the NanoController architecture. In the provided simulation environment, both are co-simulated against each other with 2 example program codes to perform a basic check of functionality.
 
 The simulation environment is currently using **Mentor QuestaSim** to perform the VHDL/SystemC co-simulation, which you need to provide within your infrastructure. Version 2021.3 has been tested, older or newer versions without warranty.
-
-**NEW 2024-03:** The *NanoSoftController* FPGA-optimized variant has been added to this repo, which uses distributed LUT RAM for instruction and data memory on Xilinx FPGAs. Furthermore, a reference Vivado synthesis and implementation flow with a Digilent Arty-A7 target is included. Vivado Version 2023.2 has been tested.
 
 ### Repository Structure
 
