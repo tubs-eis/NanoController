@@ -1,5 +1,9 @@
-nano/
-testbench/
-top_level/
+/nano/
+/control/
+/testbench/
+/top_level/
+/work/
 transcript
 vsim.wlf
+switching.saif
+*.routed.sdf

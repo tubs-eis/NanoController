@@ -1,5 +1,5 @@
--- Copyright (c) 2022 Chair for Chip Design for Embedded Computing,
---                    Technische Universitaet Braunschweig, Germany
+-- Copyright (c) 2025 Chair for Chip Design for Embedded Computing,
+--                    TU Braunschweig, Germany
 --                    www.tu-braunschweig.de/en/eis
 --
 -- Use of this source code is governed by an MIT-style
@@ -36,6 +36,7 @@ architecture edge of nano_dmem is
   constant DEPTH : natural := 2**DEPTH_LOG2;
   type dmem_t is array (0 to DEPTH-1) of std_logic_vector(WIDTH_BITS-1 downto 0);
   signal dmem : dmem_t;
+  signal dvec : std_logic_vector(DEPTH*WIDTH_BITS-1 downto 0);
   signal wen  : std_logic_vector(DEPTH-1 downto 0);
   
   -- Input Latch Signals
@@ -43,15 +44,22 @@ architecture edge of nano_dmem is
   
   -- Clock Gating Signals
   signal clk1_we_gated : std_logic;
+  signal clk1_oe_gated : std_logic;
   signal clk_row_gated : std_logic_vector(DEPTH-1 downto 0);
   
 begin
   
-  -- Clock Gating (global)
+  -- Clock Gating (global write enable)
   clk1_we_gate : entity top_level.clkgate(asic)
     port map(clk => clk1_i,
              en  => we_i,
              gck => clk1_we_gated);
+  
+  -- Clock Gating (global output enable)
+  clk1_oe_gate : entity top_level.clkgate(asic)
+    port map(clk => clk1_i,
+             en  => oe_i,
+             gck => clk1_oe_gated);
   
   -- Input Data Latch
   in_lat : process(we_i, data_i)
@@ -77,17 +85,22 @@ begin
     end process mem_write;
   end generate mem_row_gen;
   
-  -- Output Mux / Latch
-  out_mux : process(oe_i, addr_i, dmem)
-    variable dvec : std_logic_vector(DEPTH*WIDTH_BITS-1 downto 0);
-    variable dout : std_logic_vector(WIDTH_BITS-1       downto 0);
+  -- Output Functional Memory
+  func_o <= dvec(DEPTH*WIDTH_BITS-1 downto (DEPTH-FUNC_OUTS)*WIDTH_BITS);
+  out_func : process(dmem)
   begin
+    dvec <= (others => '-');
     for i in 0 to DEPTH-1 loop
-      dvec((i+1)*WIDTH_BITS-1 downto i*WIDTH_BITS) := dmem(i);
+      dvec((i+1)*WIDTH_BITS-1 downto i*WIDTH_BITS) <= dmem(i);
     end loop; --i
-    dout   := muxtree(dvec, addr_i, WIDTH_BITS);
-    func_o <= dvec(DEPTH*WIDTH_BITS-1 downto (DEPTH-FUNC_OUTS)*WIDTH_BITS);
-    if oe_i = '1' then
+  end process out_func;
+  
+  -- Output Mux
+  out_mux : process(clk1_oe_gated)
+    variable dout : std_logic_vector(WIDTH_BITS-1 downto 0);
+  begin
+    if rising_edge(clk1_oe_gated) then
+      dout := muxtree(dvec, addr_i, WIDTH_BITS);
       data_o <= dout;
     end if;
   end process out_mux;

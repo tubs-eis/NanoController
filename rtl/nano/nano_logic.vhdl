@@ -1,5 +1,5 @@
--- Copyright (c) 2022 Chair for Chip Design for Embedded Computing,
---                    Technische Universitaet Braunschweig, Germany
+-- Copyright (c) 2025 Chair for Chip Design for Embedded Computing,
+--                    TU Braunschweig, Germany
 --                    www.tu-braunschweig.de/en/eis
 --
 -- Use of this source code is governed by an MIT-style
@@ -13,20 +13,33 @@ use ieee.std_logic_1164.all;
 library synopsys;
 use synopsys.attributes.all;
 
+use work.aux_pkg.all;
 use work.nano_pkg.all;
 use work.func_pkg.all;
 
 entity nano_logic is
+  generic(CTRL_CYCLE_DEPTH_G : natural := 21;                  -- Cycle LUT Depth
+          STEP_GROUPS_G      : natural := 6;                   -- Max Number of Control Steps per Instruction
+          CTRL_SCHG_W_G      : natural := 12;                  -- State Change LUT Output Width
+          CTRL_CONF_ADR_W_G  : natural := maxi(NANO_I_W_C, 5)  -- LUT Configuration Address Port Width
+         );
   port(clk1_i     : in  std_logic;
        clk2_i     : in  std_logic;
        rst_n_i    : in  std_logic;
+       we_clut_i  : in  std_logic_vector((CTRL_CW_IDENT_W_C-1)/8 downto 0);
+       we_schg_i  : in  std_logic_vector((CTRL_SCHG_W_G-1)/8 downto 0);
+       lut_addr_i : in  std_logic_vector(CTRL_CONF_ADR_W_G-1 downto 0);
+       lut_din_i  : in  std_logic_vector(8-1 downto 0);
        ext_wake_i : in  std_logic_vector(NANO_EXT_IRQ_W_C-1 downto 0);
        instr_i    : in  std_logic_vector(NANO_I_W_C-1 downto 0);
        data_i     : in  std_logic_vector(NANO_D_W_C-1 downto 0);
        func_i     : in  std_logic_vector(NANO_FUNC_OUTS_C*NANO_D_W_C-1 downto 0);
+       sleep_o    : out std_logic;
        instr_oe   : out std_logic;
        data_oe    : out std_logic;
        data_we    : out std_logic;
+       clut_o     : out std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0);
+       schg_o     : out std_logic_vector(CTRL_SCHG_W_G-1 downto 0);
        pc_o       : out std_logic_vector(NANO_I_ADR_W_C-1 downto 0);
        addr_o     : out std_logic_vector(NANO_D_ADR_W_C-1 downto 0);
        data_o     : out std_logic_vector(NANO_D_W_C-1 downto 0)
@@ -86,17 +99,28 @@ begin
             
   -- Nano Control FSM
   nano_ctrl_inst : entity work.nano_ctrl(edge)
-    port map(clk1_i  => clk1_i,
-             clk2_i  => clk2_i,
-             rst_n_i => rst_n_i,
-             wake_i  => wake,
-             flag_i  => flag,     -- Datapath Flags
-             alu_i   => alu,
-             irqv_i  => irqv,     -- IRQ Address Vector
-             instr_i => instr_i,
-             cw_o    => cw,       -- Datapath Control Word
-             ptr_o   => addr_o,   -- MEMPTR
-             pc_o    => pc        -- Program Counter
+    generic map(CTRL_CYCLE_DEPTH_G => CTRL_CYCLE_DEPTH_G,  -- Cycle LUT Depth
+                STEP_GROUPS_G      => STEP_GROUPS_G,       -- Max Number of Control Steps per Instruction
+                CTRL_SCHG_W_G      => CTRL_SCHG_W_G,       -- State Change LUT Output Width
+                CTRL_CONF_ADR_W_G  => CTRL_CONF_ADR_W_G    -- LUT Configuration Address Port Width
+               )
+    port map(clk1_i     => clk1_i,
+             clk2_i     => clk2_i,
+             rst_n_i    => rst_n_i,
+             we_clut_i  => we_clut_i,   -- Cycle LUT Write Enable
+             we_schg_i  => we_schg_i,   -- State Change LUT Write Enable
+             lut_addr_i => lut_addr_i,  -- LUT Configuration Address Input
+             lut_din_i  => lut_din_i,   -- LUT Configuration Data Input
+             wake_i     => wake,
+             flag_i     => flag,        -- Datapath Flags
+             alu_i      => alu,
+             irqv_i     => irqv,        -- IRQ Address Vector
+             instr_i    => instr_i,
+             clut_o     => clut_o,      -- Cycle LUT Read-Out
+             schg_o     => schg_o,      -- State Change LUT Read-Out
+             cw_o       => cw,          -- Datapath Control Word
+             ptr_o      => addr_o,      -- MEMPTR
+             pc_o       => pc           -- Program Counter
             );
 
   -- Functional Unit: RTC
@@ -157,6 +181,7 @@ begin
   end process wake_ext;
   
   -- Output to Memories
+  sleep_o  <= cw(CW_PC_IRQ);
   instr_oe <= cw(CW_IMEM_OE) or not rst_n_i;
   data_oe  <= cw(CW_DMEM_OE);
   data_we  <= cw(CW_DMEM_WE);

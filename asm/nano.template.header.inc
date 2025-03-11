@@ -65,6 +65,3 @@ This is the NanoController definition file
 #define BRANCH3(t1,t2,t3)         DB(((DMASK>>1)+1)|((t1-_solo_add-3)&(DMASK>>1))); DB(((DMASK>>1)+1)|(((t2-_solo_add-2)>>(NANO_I_W-1))&(DMASK>>1))); DB(((t3-_solo_add-1)>>(2*(NANO_I_W-1)))&(DMASK>>1))
 //#define BRANCH2(t1,t2)            DB(((DMASK>>1)+1)|((t1-_solo_add-2)&(DMASK>>1))); DB(((t2-_solo_add-1)>>(NANO_I_W-1)))
 
-#include "nano.incdef"
-
-#endif

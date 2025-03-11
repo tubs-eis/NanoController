@@ -1,5 +1,5 @@
--- Copyright (c) 2022 Chair for Chip Design for Embedded Computing,
---                    Technische Universitaet Braunschweig, Germany
+-- Copyright (c) 2025 Chair for Chip Design for Embedded Computing,
+--                    TU Braunschweig, Germany
 --                    www.tu-braunschweig.de/en/eis
 --
 -- Use of this source code is governed by an MIT-style
@@ -17,11 +17,11 @@ package nano_pkg is
   -- Architectural Parameters
   constant NANO_IRQ_W_C     : natural := 4;               -- Total Number of Wake-Up Interrupts
   constant NANO_EXT_IRQ_W_C : natural := NANO_IRQ_W_C-1;  -- Number of External Wake-Up Interrupts (lower priority than internal events)
-  -- !! changed for MEH ASIC with 7 bit datapath !!
-  constant NANO_D_W_C       : natural := 7;  --6;             -- Datapath Width
-  constant NANO_D_ADR_W_C   : natural := 4;  --3;             -- Data Memory Address Width
+  -- !! changed for NexGen with 9 bit datapath !!
+  constant NANO_D_W_C       : natural := 9;               -- Datapath Width
+  constant NANO_D_ADR_W_C   : natural := 4;               -- Data Memory Address Width
   constant NANO_I_W_C       : natural := 4;               -- Instruction Width
-  constant NANO_I_ADR_W_C   : natural := 7;  --6;             -- Instruction Memory Address Width
+  constant NANO_I_ADR_W_C   : natural := 9;               -- Instruction Memory Address Width
   -- !! change end !!
   constant NANO_FUNC_OUTS_C : natural := NANO_IRQ_W_C+4;  -- Number of Functional Memory Outputs
   
@@ -29,14 +29,32 @@ package nano_pkg is
   constant PC_GROUP_W_C  : natural := mini(NANO_D_W_C, NANO_I_ADR_W_C);      -- PC Bitgroup Width
   constant PC_GROUPS_C   : natural := ((NANO_I_ADR_W_C-1)/PC_GROUP_W_C)+1;   -- Number of PC Bitgroups
   constant B_GROUP_W_C   : natural := mini(NANO_D_W_C, NANO_I_W_C-1);        -- Operand B Bitgroup Width
-  -- !! changed for fixed concat for MEH ASIC with 7 bit datapath !!
-  constant B_GROUPS_C    : natural := ((NANO_D_W_C-2)/B_GROUP_W_C)+1;  --((NANO_D_W_C-1)/B_GROUP_W_C)+1;        -- Number of Operand B Bitgroups
+  -- !! changed for NexGen with 9 bit datapath !!
+  constant B_GROUPS_C    : natural := ((NANO_D_W_C-1)/B_GROUP_W_C)+1;        -- Number of Operand B Bitgroups
   constant PTR_GROUP_W_C : natural := mini(NANO_D_ADR_W_C, NANO_I_W_C);  --NANO_I_W_C-1);    -- MEMPTR Bitgroup Width
   -- !! change end !!
   constant PTR_GROUPS_C  : natural := ((NANO_D_ADR_W_C-1)/PTR_GROUP_W_C)+1;  -- Number of MEMPTR Bitgroups
   constant CTRL_GROUPS_C : natural := maxi(B_GROUPS_C, PTR_GROUPS_C);        -- Number of Register Bitgroups for CU State
-  constant STEP_GROUPS_C : natural := 4;                                     -- Max Number of Control Steps per Instruction
-  constant SEQ_GROUPS_C  : natural := maxi(CTRL_GROUPS_C, STEP_GROUPS_C);    -- Number of Sequential Steps Register Bits
+  constant STEP_GROUPS_C : natural := 6;                                     -- Max Number of Control Steps per Instruction
+  
+  -- Control: Reconfigurable Instruction Decoder Constants
+  constant CTRL_CYCLE_DEPTH_C : natural := 21;  -- Cycle LUT Depth
+  constant CTRL_CW_IDENT_W_C  : natural := 4;   -- Control Word Identification Number Width
+  
+  -- Control: Instruction Decoder Table Addresses
+  constant IDENT_IMEM_CYCLE     : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "0000";
+  constant IDENT_DMEM_CYCLE     : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "0001";
+  constant IDENT_OPB_FROM_MEM   : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "0010";
+  constant IDENT_MEM_FROM_ACCU  : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "0011";
+  constant IDENT_CMP_ACCU_OPB   : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "0100";
+  constant IDENT_ACCU_PLUS_OPB  : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "0101";
+  constant IDENT_ACCU_MINUS_OPB : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "0110";
+  constant IDENT_ACCU_FROM_OPB  : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "0111";
+  constant IDENT_ACCU_ZERO      : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "1000";
+  constant IDENT_ACCU_PLUS_ONE  : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "1001";
+  constant IDENT_ACCU_MINUS_ONE : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "1010";
+  constant IDENT_BRANCH         : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "1011";
+  constant IDENT_WAKE           : std_logic_vector(CTRL_CW_IDENT_W_C-1 downto 0) := "1100";
   
   -- Opcode Definitions
   constant OP_LDI   : std_logic_vector(NANO_I_W_C-1 downto 0) := "0000";

@@ -1,5 +1,5 @@
-## Copyright (c) 2022 Chair for Chip Design for Embedded Computing,
-##                    Technische Universitaet Braunschweig, Germany
+## Copyright (c) 2025 Chair for Chip Design for Embedded Computing,
+##                    TU Braunschweig, Germany
 ##                    www.tu-braunschweig.de/en/eis
 ##
 ## Use of this source code is governed by an MIT-style
@@ -71,6 +71,9 @@ proc sim_compile {} {
   puts "-N- create library nano"
   vlib nano
   vmap nano
+  puts "-N- create library control"
+  vlib control
+  vmap control
   puts "-N- create library top_level"
   vlib top_level
   vmap top_level
@@ -78,29 +81,47 @@ proc sim_compile {} {
   vlib testbench
   vmap testbench
   
-  eval vcom -quiet -work top_level -check_synthesis ../rtl/top_level/clkgate.behav.vhdl
+  eval vcom -quiet -work top_level ../rtl/top_level/clkgate.behav.vhdl
   
   # compile source files for library nano
   puts "-N- compile library nano"
-  eval vcom -quiet -work nano -check_synthesis ../rtl/pkg/aux.pkg.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/pkg/func.pkg.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/pkg/nano.pkg.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/pkg/nano_rom_image.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/nano/func_rtc.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/nano/nano_ctrl.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/nano/nano_dmem.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/nano/nano_dp.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/nano/nano_imem.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/nano/nano_imem.arch.scm.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/nano/nano_logic.vhdl
-  eval vcom -quiet -work nano -check_synthesis ../rtl/nano/nano_memory.vhdl
+  eval vcom -quiet -work nano ../rtl/pkg/aux.pkg.vhdl
+  eval vcom -quiet -work nano ../rtl/pkg/func.pkg.vhdl
+  eval vcom -quiet -work nano ../rtl/pkg/nano.pkg.vhdl
+  eval vcom -quiet -work nano ../rtl/pkg/nano_rom_image.vhdl
+  eval vcom -quiet -work nano ../rtl/nano/func_rtc.vhdl
+  eval vcom -quiet -work nano ../rtl/nano/nano_lut.vhdl
+  eval vcom -quiet -work nano ../rtl/nano/nano_ctrl_cw.vhdl
+  eval vcom -quiet -work nano ../rtl/nano/nano_ctrl.vhdl
+  eval vcom -quiet -work nano ../rtl/nano/nano_dmem.vhdl
+  eval vcom -quiet -work nano ../rtl/nano/nano_dp.vhdl
+  eval vcom -quiet -work nano ../rtl/nano/nano_imem.vhdl
+  eval vcom -quiet -work nano ../rtl/nano/nano_imem.arch.scm.vhdl
+  eval vcom -quiet -work nano ../rtl/nano/nano_logic.vhdl
+  eval vcom -quiet -work nano ../rtl/nano/nano_memory.scm.vhdl
+  
+  # compile source files for library control
+  puts "-N- compile library control"
+  eval vcom -quiet -work control ../rtl/pkg/ctrl.pkg.vhdl
+  eval vcom -quiet -work control ../rtl/control/clkdiv_rst_gen.vhdl
+  eval vcom -quiet -work control ../rtl/control/dbg_ctrl.vhdl
+  eval vcom -quiet -work control ../rtl/control/dbg_spislave.vhdl
+  eval vcom -quiet -work control ../rtl/control/dbg_iface.vhdl
+  
+  # compile source files for library top_level
+  puts "-N- compile library top_level"
+  eval vcom -quiet -work top_level ../rtl/top_level/nano_top.vhdl
   
   # compile source files for library testbench
   puts "-N- compile library testbench"
-  foreach fileNameEntry [findFiles "./systemc" "*.c*"] {
-    eval sccom -work testbench $fileNameEntry
+  eval vcom -quiet -work testbench ./vhdl/sim_wrapper.vhdl
+  #foreach fileNameEntry [findFiles "./systemc" "*.c*"] {
+  #  eval sccom -work testbench $fileNameEntry
+  #}
+  #eval sccom -link -work testbench
+  foreach fileNameEntry [findFiles "./sv" "*.sv"] {
+    eval vlog -quiet -work testbench $fileNameEntry
   }
-  eval sccom -link -work testbench
   
 }
 
@@ -111,11 +132,11 @@ proc sim_start_sim {} {
   sim_compile
 
   # start simulation
-  eval vsim -t ps -L top_level -L nano -voptargs=+acc +notimingchecks -do {"set StdArithNoWarnings 1; set NumericStdNoWarnings 1"} testbench.SYSTEM
+  eval vsim -t ps -voptargs=+acc +notimingchecks -do {"set StdArithNoWarnings 1; set NumericStdNoWarnings 1"} $::env(SIM_GENERICS) testbench.SYSTEM
 
   # run the simulation
   run -all
-  quit -sim
+  #quit -sim
   
 }
 
@@ -124,6 +145,8 @@ proc sim_clean {} {
   
   puts "-N- remove library directory nano"
   file delete -force nano
+  puts "-N- remove library directory control"
+  file delete -force control
   puts "-N- remove library directory top_level"
   file delete -force top_level
   puts "-N- remove library directory testbench"

@@ -1,5 +1,5 @@
-// Copyright (c) 2022 Chair for Chip Design for Embedded Computing,
-//                    Technische Universitaet Braunschweig, Germany
+// Copyright (c) 2025 Chair for Chip Design for Embedded Computing,
+//                    TU Braunschweig, Germany
 //                    www.tu-braunschweig.de/en/eis
 //
 // Use of this source code is governed by an MIT-style
@@ -16,19 +16,20 @@
 
 
 // Datapath & Data Memory
-#define NANO_D_W     7
+//#define NANO_D_W     7
+#define NANO_D_W     9
 #define NANO_D_ADR_W 4
 
 
 // Functional Memory
 #define NANO_FUNC_OUTS (NANO_IRQ_W+4)
 
-#define FUNC_RTC_CNT_W 17
+#define FUNC_RTC_CNT_W 19
 
 
 // Encoding & Instruction Memory
 #define NANO_I_W     4
-#define NANO_I_ADR_W 7
+#define NANO_I_ADR_W 9
 
 #define OP_LDI   0
 #define OP_CMPI  1

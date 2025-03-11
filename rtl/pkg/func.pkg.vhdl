@@ -1,5 +1,5 @@
--- Copyright (c) 2022 Chair for Chip Design for Embedded Computing,
---                    Technische Universitaet Braunschweig, Germany
+-- Copyright (c) 2025 Chair for Chip Design for Embedded Computing,
+--                    TU Braunschweig, Germany
 --                    www.tu-braunschweig.de/en/eis
 --
 -- Use of this source code is governed by an MIT-style
@@ -10,6 +10,6 @@
 package func_pkg is
 
   -- RTC
-  constant FUNC_RTC_CNT_W_C : natural := 17;  -- Width of RTC counter
+  constant FUNC_RTC_CNT_W_C : natural := 10;  -- Width of RTC counter
   
 end package func_pkg;
