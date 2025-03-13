@@ -1,0 +1,263 @@
+(
+'
+##define ADR_NXT_STATE  2\n
+##define ADR_BUF_WE     8\n
+##define ADR_BUF_ADR    9\n
+##define ADR_STATE     10\n
+##define ADR_RTC       11\n
+##define ADR_WAKE_ADC  14\n
+##define ADR_WAKE_RTC  15\n
+',
+[
+  [
+    {'opcode' : 'bb',    'imm' : '',                                'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}, 'srcline' : 'ORG 0'},
+    {'opcode' : 'clAcc', 'imm' : '',                                'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_STATE',                       'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',                                'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_BUF_WE',                      'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',                                'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_BUF_ADR',                     'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',                                'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_NXT_STATE',                   'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'inc',   'imm' : '',                                'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'stMem', 'imm' : '',                                'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    [
+      [
+        {'opcode' : 'ldImm', 'imm' : 'dummy, dummy>>3, dummy>>6',       'def' : {'OPB'},                           'use' : {'#'}},
+        {'opcode' : 'mvAcc', 'imm' : '',                                'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+        {'opcode' : 'ldPtr', 'imm' : 'ADR_WAKE_ADC',                    'def' : {'MEMPTR'},                        'use' : {'#'}},
+        {'opcode' : 'stMem', 'imm' : '',                                'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}}
+      ],
+      [
+        {'opcode' : 'ldImm', 'imm' : 'rtcloop, rtcloop>>3, rtcloop>>6', 'def' : {'OPB'},                           'use' : {'#'}},
+        {'opcode' : 'mvAcc', 'imm' : '',                                'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+        [
+          [
+            {'opcode' : 'ldPtr', 'imm' : 'ADR_WAKE_RTC',                    'def' : {'MEMPTR'},                        'use' : {'#'}},
+            {'opcode' : 'stMem', 'imm' : '',                                'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}}
+          ],
+          [
+            {'opcode' : 'ldPtr', 'imm' : 'ADR_RTC',                         'def' : {'MEMPTR'},                        'use' : {'#'}},
+            {'opcode' : 'stMem', 'imm' : '',                                'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}}
+          ]
+        ]
+      ]
+    ]
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'dummy', 'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'sleep', 'imm' : '',      'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'rtcloop',             'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'clAcc', 'imm' : '',                    'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_RTC',             'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',                    'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldImm', 'imm' : '100, 100>>3, 100>>6', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                    'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'stMem', 'imm' : '',                    'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_STATE',           'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'ldMem', 'imm' : '',                    'def' : {'OPB'},                           'use' : {'MEMPTR','MEM'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                    'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'ldImm', 'imm' : '4',                   'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'cmp',   'imm' : '',                    'def' : {'Z'},                             'use' : {'ACCU','OPB'}},
+    {'opcode' : 'ldLbl', 'imm' : 'loop01',              'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',                    'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : '',       'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'clAcc', 'imm' : '',       'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'inc',   'imm' : '',       'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'ldLbl', 'imm' : 'loop02', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',       'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop01', 'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldImm', 'imm' : '5',      'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'cmp',   'imm' : '',       'def' : {'Z'},                             'use' : {'ACCU','OPB'}},
+    {'opcode' : 'ldLbl', 'imm' : 'loop03', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',       'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : '', 'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'clAcc', 'imm' : '', 'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'inc',   'imm' : '', 'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop02', 'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldLbl', 'imm' : 'loop04', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',       'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop03', 'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldImm', 'imm' : '2',      'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'cmp',   'imm' : '',       'def' : {'Z'},                             'use' : {'ACCU','OPB'}},
+    {'opcode' : 'ldLbl', 'imm' : 'loop05', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',       'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : '',              'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_NXT_STATE', 'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'ldMem', 'imm' : '',              'def' : {'OPB'},                           'use' : {'MEMPTR','MEM'}},
+    {'opcode' : 'mvAcc', 'imm' : '',              'def' : {'ACCU','Z'},                      'use' : {'OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop04', 'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldImm', 'imm' : '1',      'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'cmp',   'imm' : '',       'def' : {'Z'},                             'use' : {'ACCU','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop05', 'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldLbl', 'imm' : 'loop1',  'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',       'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop06',      'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'clAcc', 'imm' : '',            'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'inc',   'imm' : '',            'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_BUF_WE',  'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',            'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'clAcc', 'imm' : '',            'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'stMem', 'imm' : '',            'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_BUF_ADR', 'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'ldMem', 'imm' : '',            'def' : {'OPB'},                           'use' : {'MEMPTR','MEM'}},
+    {'opcode' : 'mvAcc', 'imm' : '',            'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'inc',   'imm' : '',            'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'stMem', 'imm' : '',            'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop1',        'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_STATE',    'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'ldMem', 'imm' : '',             'def' : {'OPB'},                           'use' : {'MEMPTR','MEM'}},
+    {'opcode' : 'mvAcc', 'imm' : '',             'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'ldImm', 'imm' : '1',            'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'cmp',   'imm' : '',             'def' : {'Z'},                             'use' : {'ACCU','OPB'}},
+    {'opcode' : 'ldLbl', 'imm' : 'loop2, loop2', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',             'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_NXT_STATE',             'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'ldMem', 'imm' : '',                          'def' : {'OPB'},                           'use' : {'MEMPTR','MEM'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'ldLbl', 'imm' : 'regular, regular, regular', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'inc',   'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_STATE',                 'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'ldMem', 'imm' : '',                          'def' : {'OPB'},                           'use' : {'MEMPTR','MEM'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'dec',   'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'clAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_RTC',                   'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldImm', 'imm' : '511, 511>>3, 511>>6',       'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldLbl', 'imm' : 'rtcloop, rtcloop, rtcloop', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop2',        'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldImm', 'imm' : '2, 2>>3',      'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'cmp',   'imm' : '',             'def' : {'Z'},                             'use' : {'ACCU','OPB'}},
+    {'opcode' : 'ldLbl', 'imm' : 'loop3, loop3', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',             'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : '',                 'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_NXT_STATE',    'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'ldMem', 'imm' : '',                 'def' : {'OPB'},                           'use' : {'MEMPTR','MEM'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                 'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'ldImm', 'imm' : '1',                'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'cmp',   'imm' : '',                 'def' : {'Z'},                             'use' : {'ACCU','OPB'}},
+    {'opcode' : 'ldLbl', 'imm' : 'regular, regular', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',                 'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldImm', 'imm' : '6, 6>>3',                   'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_STATE',                 'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'ldMem', 'imm' : '',                          'def' : {'OPB'},                           'use' : {'MEMPTR','MEM'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'dec',   'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'inc',   'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'ldLbl', 'imm' : 'rtcloop, rtcloop, rtcloop', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop3',        'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldImm', 'imm' : '5, 5>>3',      'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'cmp',   'imm' : '',             'def' : {'Z'},                             'use' : {'ACCU','OPB'}},
+    {'opcode' : 'ldLbl', 'imm' : 'loop4, loop4', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',             'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldImm', 'imm' : '2, 2>>3',                   'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'clAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'inc',   'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_NXT_STATE',             'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldLbl', 'imm' : 'rtcloop, rtcloop, rtcloop', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop4',        'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldImm', 'imm' : '7, 7>>3',      'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'cmp',   'imm' : '',             'def' : {'Z'},                             'use' : {'ACCU','OPB'}},
+    {'opcode' : 'ldLbl', 'imm' : 'loop5, loop5', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',             'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'clAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'inc',   'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'clAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_NXT_STATE',             'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'inc',   'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'ldLbl', 'imm' : 'rtcloop, rtcloop, rtcloop', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'loop5',        'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldImm', 'imm' : '6, 6>>3',      'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'cmp',   'imm' : '',             'def' : {'Z'},                             'use' : {'ACCU','OPB'}},
+    {'opcode' : 'ldLbl', 'imm' : 'regular',      'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',             'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : '',                    'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'clAcc', 'imm' : '',                    'def' : {'ACCU','Z'},                      'use' : {'0'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_RTC',             'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',                    'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldImm', 'imm' : '200, 200>>3, 200>>6', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                    'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'stMem', 'imm' : '',                    'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}}
+  ],
+  [
+    {'opcode' : 'bb',    'imm' : 'regular',                   'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_NXT_STATE',             'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'ldMem', 'imm' : '',                          'def' : {'OPB'},                           'use' : {'MEMPTR','MEM'}},
+    {'opcode' : 'mvAcc', 'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'OPB'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_STATE',                 'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'inc',   'imm' : '',                          'def' : {'ACCU','Z'},                      'use' : {'ACCU','1'}},
+    {'opcode' : 'ldPtr', 'imm' : 'ADR_NXT_STATE',             'def' : {'MEMPTR'},                        'use' : {'#'}},
+    {'opcode' : 'stMem', 'imm' : '',                          'def' : {'MEM'},                           'use' : {'MEMPTR','ACCU'}},
+    {'opcode' : 'ldLbl', 'imm' : 'rtcloop, rtcloop, rtcloop', 'def' : {'OPB'},                           'use' : {'#'}},
+    {'opcode' : 'bcond', 'imm' : '',                          'def' : {'OPB','ACCU','Z','MEMPTR','MEM'}, 'use' : {'Z','OPB'}}
+  ]
+]
+)
