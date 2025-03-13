@@ -16,7 +16,8 @@ module SPI_Debug_Master(
   o_nano_rst_n,
   o_dbg_spi_en_n,
   o_dbg_spi_mosi,
-  o_dbg_spi_sclk);
+  o_dbg_spi_sclk,
+  o_tb_boot_done);
 
   parameter string app_prefix;
 
@@ -26,6 +27,7 @@ module SPI_Debug_Master(
   output logic o_dbg_spi_en_n;
   output logic o_dbg_spi_mosi;
   output logic o_dbg_spi_sclk;
+  output logic o_tb_boot_done;
   
   byte cyclelut[`SIZE_CLUT];
   shortint schg[`SIZE_SCHG];
@@ -102,6 +104,7 @@ module SPI_Debug_Master(
     o_dbg_spi_en_n = 1'b1;
     o_dbg_spi_mosi = 1'b0;
     o_dbg_spi_sclk = 1'b0;
+    o_tb_boot_done = 1'b0;
     
     // Remove Reset
     repeat(4) @(posedge i_nano_clk);
@@ -156,8 +159,8 @@ module SPI_Debug_Master(
                         spi_protocolstate = readval;
                       end else begin
                         spi_protocolstate = writeval;
+                        $display("[SPI]  %0t: Issued command    %d", $realtime, spi_tx_val);
                       end
-                      $display("[SPI]  %0t: Issued command    %d", $realtime, spi_tx_val);
                       if (spi_tx_cnt < spi_tx_len - 1) begin
                         spi_tx_cnt++;
                       end
@@ -169,10 +172,11 @@ module SPI_Debug_Master(
                     begin
                       o_dbg_spi_en_n = 1'b1;
                       o_dbg_spi_mosi = 1'b0;
+                      o_tb_boot_done = 1'b1;
                       spi_masterstate = idle;
                       spi_protocolstate = cmd;
                       ctrlval = spi_rx_data;
-                      $display("[SPI]  %0t: Received value   %d", $realtime, ctrlval);
+                      //$display("[SPI]  %0t: Received value   %d", $realtime, ctrlval);
                       /*
                       $write("[NANO] %0t: Decoded CTRL     %d ( ", $realtime, ctrlval);
                       if (ctrlval & 8'h01) $write("LDO_en ");

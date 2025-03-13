@@ -115,10 +115,10 @@ proc sim_compile {} {
   # compile source files for library testbench
   puts "-N- compile library testbench"
   eval vcom -quiet -work testbench ./vhdl/sim_wrapper.vhdl
-  #foreach fileNameEntry [findFiles "./systemc" "*.c*"] {
-  #  eval sccom -work testbench $fileNameEntry
-  #}
-  #eval sccom -link -work testbench
+  foreach fileNameEntry [findFiles "./systemc" "*.cpp"] {
+    eval sccom -work testbench $fileNameEntry
+  }
+  eval sccom -link -work testbench
   foreach fileNameEntry [findFiles "./sv" "*.sv"] {
     eval vlog -quiet -work testbench $fileNameEntry
   }

@@ -16,7 +16,6 @@
 
 
 // Datapath & Data Memory
-//#define NANO_D_W     7
 #define NANO_D_W     9
 #define NANO_D_ADR_W 4
 
@@ -24,7 +23,7 @@
 // Functional Memory
 #define NANO_FUNC_OUTS (NANO_IRQ_W+4)
 
-#define FUNC_RTC_CNT_W 19
+#define FUNC_RTC_CNT_W 10
 
 
 // Encoding & Instruction Memory

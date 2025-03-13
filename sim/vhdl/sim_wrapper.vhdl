@@ -1,3 +1,12 @@
+-- Copyright (c) 2025 Chair for Chip Design for Embedded Computing,
+--                    TU Braunschweig, Germany
+--                    www.tu-braunschweig.de/en/eis
+--
+-- Use of this source code is governed by an MIT-style
+-- license that can be found in the LICENSE file or at
+-- https://opensource.org/licenses/MIT.
+
+
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -13,15 +22,27 @@ library top_level;
 entity sim_wrapper is
   port(
     -- Inputs
-    i_nano_clk         : in  std_logic;
-    i_nano_rst_n       : in  std_logic;
-    i_nano_ext_wake    : in  std_logic;
-    i_dbg_spi_en_n     : in  std_logic;
-    i_dbg_spi_mosi     : in  std_logic;
-    i_dbg_spi_sclk     : in  std_logic;
+    i_nano_clk           : in  std_logic;
+    i_nano_rst_n         : in  std_logic;
+    i_nano_ext_wake      : in  std_logic;
+    i_dbg_spi_en_n       : in  std_logic;
+    i_dbg_spi_mosi       : in  std_logic;
+    i_dbg_spi_sclk       : in  std_logic;
     -- Outputs
-    o_nano_ctrl        : out std_logic_vector(35 downto 0);
-    o_dbg_spi_miso     : out std_logic
+    o_nano_func          : out std_logic_vector(NANO_FUNC_OUTS_C*NANO_D_W_C-1 downto 0);
+    o_dbg_spi_miso       : out std_logic;
+    -- Outputs for Testbench
+    o_nano_clk           : out std_logic;
+    o_nano_rst_n_int     : out std_logic;
+    o_nano_ext_wake      : out std_logic_vector(NANO_EXT_IRQ_W_C-1 downto 0);
+    o_nano_instr         : out std_logic_vector(NANO_I_W_C-1 downto 0);
+    o_nano_instr_addr    : out std_logic_vector(NANO_I_ADR_W_C-1 downto 0);
+    o_nano_instr_oe      : out std_logic;
+    o_nano_data_from_mem : out std_logic_vector(NANO_D_W_C-1 downto 0);
+    o_nano_data_addr     : out std_logic_vector(NANO_D_ADR_W_C-1 downto 0);
+    o_nano_data_to_mem   : out std_logic_vector(NANO_D_W_C-1 downto 0);
+    o_nano_data_oe       : out std_logic;
+    o_nano_data_we       : out std_logic
     );
 end entity sim_wrapper;
 
@@ -214,6 +235,17 @@ begin
   -----------------------------------------------------------------------------
   -- Connection to pins
   -----------------------------------------------------------------------------
-  o_nano_ctrl <= nano_func(o_nano_ctrl'length-1 downto 0);
+  o_nano_func          <= nano_func_from_mem;
+  o_nano_clk           <= nano_clk;
+  o_nano_rst_n_int     <= nano_rst_n_int;
+  o_nano_ext_wake      <= nano_ext_wake;
+  o_nano_instr         <= nano_instr;
+  o_nano_instr_addr    <= nano_instr_addr;
+  o_nano_instr_oe      <= nano_instr_oe;
+  o_nano_data_from_mem <= nano_data_from_mem;
+  o_nano_data_addr     <= nano_data_addr;
+  o_nano_data_to_mem   <= nano_data_to_mem;
+  o_nano_data_oe       <= nano_data_oe;
+  o_nano_data_we       <= nano_data_we;
   
 end architecture str;
