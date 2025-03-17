@@ -1,5 +1,5 @@
-## Copyright (c) 2024 Chair for Chip Design for Embedded Computing,
-##                    Technische Universitaet Braunschweig, Germany
+## Copyright (c) 2025 Chair for Chip Design for Embedded Computing,
+##                    TU Braunschweig, Germany
 ##                    www.tu-braunschweig.de/en/eis
 ##
 ## Use of this source code is governed by an MIT-style
@@ -62,15 +62,27 @@ lappend libraries(${idx},files) "../../rtl/pkg/func.pkg.vhdl"
 lappend libraries(${idx},files) "../../rtl/pkg/nano.pkg.vhdl"
 lappend libraries(${idx},files) "../../rtl/pkg/nano_rom_image.vhdl"
 lappend libraries(${idx},files) "../../rtl/nano/func_rtc.vhdl"
+lappend libraries(${idx},files) "../../rtl/nano/nano_lut.arty.vhdl"
+lappend libraries(${idx},files) "../../rtl/nano/nano_ctrl_cw.vhdl"
 lappend libraries(${idx},files) "../../rtl/nano/nano_ctrl.vhdl"
 lappend libraries(${idx},files) "../../rtl/nano/nano_dmem.arty.vhdl"
 lappend libraries(${idx},files) "../../rtl/nano/nano_dp.vhdl"
-lappend libraries(${idx},files) "../../rtl/nano/nano_imem.vhdl"
-lappend libraries(${idx},files) "../../rtl/nano/nano_imem.arch.arty.vhdl"
 lappend libraries(${idx},files) "../../rtl/nano/nano_logic.vhdl"
+lappend libraries(${idx},files) "../../rtl/nano/nano_memory.arty.vhdl"
 #foreach fileNameEntry [findFiles "../../rtl/nano" "*.vhd*"] {
 #  lappend libraries(${idx},files) $fileNameEntry
 #}
+
+
+### library module control
+incr idx
+set libraries(${idx},name) "control"
+set libraries(${idx},id)  ${idx}
+set libraries(${idx},sim) 0
+lappend libraries(${idx},files) "../../rtl/pkg/ctrl.pkg.vhdl"
+lappend libraries(${idx},files) "../../rtl/control/dbg_ctrl.vhdl"
+lappend libraries(${idx},files) "../../rtl/control/dbg_uart.vhdl"
+lappend libraries(${idx},files) "../../rtl/control/dbg_iface.arty.vhdl"
 
 
 ### library module top_level
