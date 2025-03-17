@@ -36,6 +36,12 @@ library top_level;
 
 architecture sync_rom of nano_imem is
   
+  component clkgate is
+    port(clk : in  std_logic;
+         en  : in  std_logic;
+         gck : out std_logic);
+  end component;
+  
   -- MEM Array
   type imem_t is array (0 to DEPTH-1) of std_logic_vector(WIDTH_BITS-1 downto 0);
   
@@ -61,7 +67,7 @@ architecture sync_rom of nano_imem is
 begin
   
   -- Clock Gating (global output enable)
-  clk1_oe_gate : entity top_level.clkgate(asic)
+  clk1_oe_gate : clkgate
     port map(clk => clk1_i,
              en  => oe_i,
              gck => clk1_oe_gated);

@@ -36,7 +36,7 @@ foreach fileNameEntry [findFiles "$dest_dir/.." "*.img"] {
 
 # Create Memory IP
 create_ip -name dist_mem_gen -vendor xilinx.com -library ip -version 8.0 -module_name main
-set_property -dict [list CONFIG.coefficient_file [file normalize "$dest_dir/imem_image.coe"] CONFIG.data_width {8} CONFIG.depth {64} CONFIG.input_clock_enable {true} CONFIG.input_options {registered}] [get_ips main]
+set_property -dict [list CONFIG.coefficient_file [file normalize "$dest_dir/imem_image.coe"] CONFIG.data_width {8} CONFIG.depth {256} CONFIG.input_clock_enable {true} CONFIG.input_options {registered}] [get_ips main]
 generate_target {instantiation_template} [get_files [file normalize "$dest_dir/${proj_name}.srcs/sources_1/ip/main/main.xci"]]
 generate_target all [get_files [file normalize "$dest_dir/${proj_name}.srcs/sources_1/ip/main/main.xci"]]
 catch { config_ip_cache -export [get_ips -all main] }

@@ -1,5 +1,5 @@
--- Copyright (c) 2024 Chair for Chip Design for Embedded Computing,
---                    Technische Universitaet Braunschweig, Germany
+-- Copyright (c) 2025 Chair for Chip Design for Embedded Computing,
+--                    TU Braunschweig, Germany
 --                    www.tu-braunschweig.de/en/eis
 --
 -- Use of this source code is governed by an MIT-style
@@ -46,15 +46,17 @@ architecture edge of nano_dmem is
   
 begin
   
-  data_o <= dmem(to_integer(unsigned(addr_i)));
-  mem_write : process(clk1_i)
+  mem_sync : process(clk1_i)
   begin
     if rising_edge(clk1_i) then
       if we_i = '1' then
         dmem(to_integer(unsigned(addr_i))) <= data_i;
       end if;
+      if oe_i = '1'then
+        data_o <= dmem(to_integer(unsigned(addr_i)));
+      end if;
     end if;
-  end process mem_write;
+  end process mem_sync;
   
   -- Functional Memory
   wen <= dectree(we_i, addr_i);
