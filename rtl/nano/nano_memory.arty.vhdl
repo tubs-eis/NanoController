@@ -33,20 +33,55 @@ end entity nano_memory;
 
 architecture edge of nano_memory is
   
-  signal q : std_logic_vector(NANO_D_W_C-1 downto 0);
+  COMPONENT main
+    PORT (
+      clk : IN STD_LOGIC;
+      i_ce : IN STD_LOGIC;
+      we : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+      a : IN STD_LOGIC_VECTOR(imem_addr_i'length-2 DOWNTO 0);
+      d : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
+      spo : OUT STD_LOGIC_VECTOR(8 DOWNTO 0)
+    );
+  END COMPONENT;
+  
+  -- Distributed RAM Macro Interface
+  signal ce : std_logic;
+  signal we : std_logic_vector(0 downto 0);
+  signal q  : std_logic_vector(NANO_D_W_C-1 downto 0);
+  
+  -- DMEM / IMEM Muxing
+  signal d : std_logic_vector(8 downto 0);
+  signal a : std_logic_vector(imem_addr_i'length-2 downto 0);
   
   -- Output Selection
+  signal a0_ff  : std_logic;
   signal adc_ff : std_logic;
   
 begin
   
   -----------------------------------------------------------------------------
+  -- Interface Signals
+  -----------------------------------------------------------------------------
+  ce    <= dmem_oe_i or dmem_we_i or imem_oe_i or imem_we_i;
+  we(0) <= imem_we_i or dmem_we_i;
+  
+  -----------------------------------------------------------------------------
+  -- DMEM / IMEM Muxing
+  -----------------------------------------------------------------------------
+  d <= '0' & imem_instr_i when imem_we_i = '1' else dmem_data_i;
+  a <= "1111" & dmem_addr_i when (dmem_oe_i = '1' or dmem_we_i = '1') else imem_addr_i(8 downto 1);
+  
+  -----------------------------------------------------------------------------
   -- Output Selection
   -----------------------------------------------------------------------------
   dmem_data_o  <= adc_i when adc_ff = '1' else q;
+  imem_instr_o <= q(3 downto 0) when a0_ff = '1' else q(7 downto 4);
   process(clk1_i)
   begin
     if rising_edge(clk1_i) then
+      if imem_oe_i = '1' then
+        a0_ff <= imem_addr_i(0);
+      end if;
       if dmem_oe_i = '1' then
         adc_ff <= '1';
         for i in 0 to NANO_D_ADR_W_C-1 loop
@@ -58,8 +93,10 @@ begin
     end if;
   end process;
   
-  
-  nano_dmem_inst : entity work.nano_dmem(edge)
+  -----------------------------------------------------------------------------
+  -- Functional Memory
+  -----------------------------------------------------------------------------
+  funcmem_inst : entity work.nano_dmem(edge)
     generic map(
       DEPTH_LOG2 => NANO_D_ADR_W_C,
       WIDTH_BITS => NANO_D_W_C,
@@ -67,25 +104,24 @@ begin
     port map(
       clk1_i => clk1_i,
       clk2_i => clk2_i,
-      oe_i   => dmem_oe_i,
+      oe_i   => '0',
       we_i   => dmem_we_i,
       addr_i => dmem_addr_i,
       data_i => dmem_data_i,
-      data_o => q,
+      data_o => open,
       func_o => dmem_func_o);           -- Functional Memory Output
   
-  nano_imem_inst : entity work.nano_imem(edge_ram)
-    generic map(DEPTH      => 2**NANO_I_ADR_W_C,
-                DEPTH_LOG2 => NANO_I_ADR_W_C,
-                WIDTH_BITS => NANO_I_W_C
-               )
-    port map(clk1_i  => clk1_i,
-             clk2_i  => clk2_i,
-             oe_i    => imem_oe_i,
-             we_i    => imem_we_i,
-             addr_i  => imem_addr_i,
-             instr_i => imem_instr_i,
-             instr_o => imem_instr_o
-            );
+  -----------------------------------------------------------------------------
+  -- Distributed RAM Macro Instance
+  -----------------------------------------------------------------------------
+  main_inst : main
+    PORT MAP (
+      clk => clk1_i,
+      i_ce => ce,
+      we => we,
+      a => a,
+      d => d,
+      spo => q
+    );
   
 end architecture edge;
